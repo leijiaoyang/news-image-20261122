@@ -27,11 +27,19 @@ import shutil
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "entry.png")
 DST = "/output/entry.png"
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
 def main() -> None:
+    with open(SRC, "rb") as fh:
+        head = fh.read(len(PNG_SIGNATURE))
+    if head != PNG_SIGNATURE:
+        raise SystemExit("entry.png is not a PNG file")
     os.makedirs("/output", exist_ok=True)
     shutil.copyfile(SRC, DST)
+    with open(SRC, "rb") as src, open(DST, "rb") as dst:
+        if src.read() != dst.read():
+            raise SystemExit("copied entry.png does not match the source")
     print("wrote %s (%d bytes)" % (DST, os.path.getsize(DST)))
 
 
